@@ -24,6 +24,17 @@ contract('Testing MyToken contract', function(accounts) {
       expect(await token.name()).to.equal(name)
     })
 
+    it('should pay into contract', async () => {
+      const payNotEnough = () => token.purchase({from: account2, value: web3.toWei(0.5, "ether")})
+      expectRevert(payNotEnough)
+
+      const payTooMuch = () => token.purchase({from: account2, value: web3.toWei(1.5, "ether")})
+      expectRevert(payTooMuch)
+
+      const payJustEnough = () => token.purchase({from: account2, value: web3.toWei(1, "ether")})
+      payJustEnough()
+    })
+
     it('should not be able to mint a token with an existing tokenID', async () => {
       const duplicateTokenID = () => token.mintUniqueTokenTo(account2, tokenId1, tokenUri2, {from: accounts[0]})
       expectRevert(duplicateTokenID)

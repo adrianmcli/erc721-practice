@@ -8,6 +8,10 @@ contract MyToken is ERC721Token {
 
   }
 
+  function purchase() public payable {
+  	require(msg.value == 1 ether);
+  }
+
   /**
   * Custom accessor to create a unique token
   */
