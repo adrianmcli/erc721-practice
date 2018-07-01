@@ -1,17 +1,5 @@
 const MyToken = artifacts.require("MyToken");
 
-const expectRevert = async (fn) => {
-  let errorMsg = "__no error message__"
-
-  try {
-    await fn()
-  } catch (err) {
-    errorMsg = err.message
-  }
-
-  expect(errorMsg).to.equal('VM Exception while processing transaction: revert')
-}
-
 contract('Testing MyToken contract', function(accounts) {
 
     let token;
@@ -73,3 +61,16 @@ contract('Testing MyToken contract', function(accounts) {
       expect(await token.ownerOf(tokenId2)).to.equal(account3)
     })
 })
+
+// custom util for expecting reverts
+async function expectRevert(fn) {
+  let errorMsg = "__no error message__"
+
+  try {
+    await fn()
+  } catch (err) {
+    errorMsg = err.message
+  }
+
+  expect(errorMsg).to.equal('VM Exception while processing transaction: revert')
+}
