@@ -45,26 +45,30 @@ contract('Testing MyToken contract', function(accounts) {
       const additionalToken = await token.mintUniqueTokenTo(account2, tokenId2, tokenUri2, {from: accounts[0]})
       expect(Number(await token.totalSupply())).to.equal(2)
 
+      // check for token existence
       expect(await token.exists(tokenId1)).to.be.true
       expect(await token.exists(tokenId2)).to.be.true
       expect(await token.exists(9999)).to.be.false // Dummy tokenId
 
+      // check for token ownership
       expect(await token.ownerOf(tokenId1)).to.equal(account1)
       expect(await token.ownerOf(tokenId2)).to.equal(account2)
     })
 
     it('should allow safe transfers', async () => {
-
-      const unownedTokenId = () => token.safeTransferFrom(account2, account3, tokenId1, {from: accounts[2]}) // tokenId
+      // token ID 9999 does not exist
+      const unownedTokenId = () => token.safeTransferFrom(account2, account3, 9999, {from: accounts[2]}) // tokenId
       expectRevert(unownedTokenId)
 
+      // account 1 does not hold tokenId2
       const wrongOwner = () => token.safeTransferFrom(account1, account3, tokenId2, {from: accounts[1]}) // wrong owner
       expectRevert(wrongOwner)
 
-      // Noticed that the from gas param needs to be the token owners or it fails
+      // Notice that the "from" account needs to be the token owner or else it fails
       const wrongFromGas = () => token.safeTransferFrom(account2, account3, tokenId2, {from: accounts[1]}) // wrong owner
       expectRevert(wrongFromGas)
 
+      // successful transfer
       await token.safeTransferFrom(account2, account3, tokenId2, {from: accounts[2]})
       expect(await token.ownerOf(tokenId2)).to.equal(account3)
     })
