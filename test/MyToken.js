@@ -15,6 +15,8 @@ contract('Testing MyToken contract', function(accounts) {
     const tokenUri2 = "This is data for the token 2"; // Does not have to be unique
 
     const account3 = accounts[3]
+    const tokenId3 = 3333;
+    const tokenUri3 = "This is data for the token 3"
 
     it('should be able to deploy and mint ERC721 token', async () => {
       token = await MyToken.new(name, symbol)
@@ -71,6 +73,24 @@ contract('Testing MyToken contract', function(accounts) {
       await token.safeTransferFrom(account2, account3, tokenId2, {from: accounts[2]})
       expect(await token.ownerOf(tokenId2)).to.equal(account3)
     })
+
+    it('should issue a token after paying', async () => {
+      // paying too little
+      const payNotEnough = () => token.purchaseAndMint(account3, tokenId3, tokenUri3, web3.toWei(1, "ether"), {from: account2, value: web3.toWei(0.5, "ether")})
+      expectRevert(payNotEnough)
+
+      // paying too much
+      const payTooMuch = () => token.purchaseAndMint(account3, tokenId3, tokenUri3, web3.toWei(1, "ether"), {from: account3, value: web3.toWei(1.5, "ether")})
+      expectRevert(payTooMuch)
+
+      const payJustEnough = () => token.purchaseAndMint(account3, tokenId3, tokenUri3, web3.toWei(1, "ether"), {from: account3, value: web3.toWei(1, "ether")})
+      payJustEnough();
+
+      // check for token existence
+      expect(await token.exists(tokenId3)).to.be.true
+    })
+
+
 })
 
 // custom util for expecting reverts
